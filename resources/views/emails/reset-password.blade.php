@@ -14,7 +14,8 @@
             height: 100vh;
             background-color: #f4f4f4;
             margin: 0;
-            overflow: hidden; /* Ensure no scrollbar due to fixed position */
+            overflow: hidden;
+            background: #b8dbff;
         }
         .container {
             background: #fff;
@@ -25,7 +26,7 @@
             max-width: 400px;
             box-sizing: border-box;
             position: relative;
-            z-index: 1; /* Ensure it is above the notification */
+            z-index: 1;
         }
         h1 {
             margin-top: 0;
@@ -33,6 +34,7 @@
         }
         .form-group {
             margin-bottom: 15px;
+            
         }
         .form-group label {
             display: block;
@@ -40,9 +42,10 @@
         }
         .form-group input {
             width: 100%;
-            padding: 8px;
+            padding-top: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            text-align: center;
         }
         .form-group button {
             width: 100%;
@@ -81,7 +84,7 @@
         }
     </style>
 </head>
-<body>
+<body>    
     <div class="container">
         <h1>Reset Your Password</h1>
 
