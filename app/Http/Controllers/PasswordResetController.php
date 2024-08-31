@@ -10,6 +10,12 @@ use Illuminate\Validation\ValidationException;
 
 class PasswordResetController extends Controller
 {
+    /**
+     * Send reset link
+     *
+     * @param Request $request
+     * @return boolean
+     */
     public function sendResetLinkEmail(Request $request) : bool
     {
         $request->validate(['email' => 'required|email']);
@@ -23,6 +29,12 @@ class PasswordResetController extends Controller
         return false;
     }
 
+    /**
+     * Reset password
+     *
+     * @param ResetPasswordRequest $request
+     * @return void
+     */
     public function reset(ResetPasswordRequest $request)
     {
         $validated = $request->validated();
