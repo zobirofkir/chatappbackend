@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 class PasswordResetController extends Controller
 {
-    public function sendResetLinkEmail(Request $request)
+    public function sendResetLinkEmail(Request $request) : bool
     {
         $request->validate(['email' => 'required|email']);
 

@@ -6,13 +6,14 @@ use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() : AnonymousResourceCollection
     {
         return UserResource::collection(
             User::paginate(10)
@@ -22,7 +23,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserRequest $request)
+    public function store(UserRequest $request) : UserResource
     {
         return UserResource::make(
             User::create($request->validated())
@@ -32,7 +33,7 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $user)
+    public function show(User $user) : UserResource
     {
         return UserResource::make($user);
     }
@@ -40,7 +41,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserRequest $request, User $user)
+    public function update(UserRequest $request, User $user) : UserResource
     {
         $user->update($request->validated());
         return UserResource::make(
@@ -51,7 +52,7 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $user) : bool
     {
         return $user->delete();
     }

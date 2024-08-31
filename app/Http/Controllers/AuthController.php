@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    public function register(UserRequest $request)
+    public function register(UserRequest $request) : UserResource
     {
         return UserResource::make(
             User::create($request->validated())
@@ -37,38 +37,38 @@ class AuthController extends Controller
         return AuthResource::make($user);
     }
 
-    public function logout()
+    public function logout() : bool
     {
         $user = $this->currentUser();    
         $user->token()?->revoke();
         return true;
     }
 
-    public function me() {
-        return UserResource::make($this->currentUser());
+    public function me() : AuthResource
+    { 
+        return AuthResource::make($this->currentUser());
     }
 
-    public function refresh() {
-        return UserResource::make($this->currentUser());
+    public function refresh() : AuthResource
+    {
+        return AuthResource::make($this->currentUser());
     }
 
-    public function update(UserRequest $request) {
+    public function update(UserRequest $request) : AuthResource
+    {
         $user = $this->currentUser();
         $user->update($request->validated());
-        return UserResource::make($user);
+        return AuthResource::make($user);
     }
 
-    public function destroy() {
+    public function destroy() : bool
+    {
         $user = $this->currentUser();
         $user->delete();
         return true;
     }   
-
-    public function index() {
-        return UserResource::collection(User::all());
-    }
      
-    public function currentUser()
+    public function currentUser() : User
     {
         return User::find(Auth::user()->id);
     }
