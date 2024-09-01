@@ -9,6 +9,7 @@ use App\Jobs\MessageNotificationJob;
 use App\Models\Attachment;
 use App\Models\Message;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Storage;
 
 class AttachmentController extends Controller
@@ -16,7 +17,7 @@ class AttachmentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() : AnonymousResourceCollection
     {
         return AttachmentResource::collection(
             Attachment::all()
@@ -26,7 +27,7 @@ class AttachmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AttachmentRequest $request, $conversation_id, $message_id)
+    public function store(AttachmentRequest $request, $conversation_id, $message_id) : AttachmentResource
     {
         // Verify that the message exists within the specified conversation
         Message::where('id', $message_id)
@@ -61,7 +62,7 @@ class AttachmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($conversation_id, $message_id, $attachment_id)
+    public function show($conversation_id, $message_id, $attachment_id) : AttachmentResource
     {
         $attachment = Attachment::where('id', $attachment_id)
             ->where('message_id', $message_id)
@@ -76,7 +77,7 @@ class AttachmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(AttachmentRequest $request, $conversation_id, $message_id, $attachment_id)
+    public function update(AttachmentRequest $request, $conversation_id, $message_id, $attachment_id) : AttachmentResource
     {
         $attachment = Attachment::findOrFail($attachment_id);
         $data = $request->validated();
@@ -101,7 +102,7 @@ class AttachmentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($conversation_id, $message_id, $attachment_id)
+    public function destroy($conversation_id, $message_id, $attachment_id) : bool
     {    
         $attachment = Attachment::find($attachment_id);
             
