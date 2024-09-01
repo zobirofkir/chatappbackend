@@ -58,4 +58,17 @@ class ConversationController extends Controller
     {
         return $conversation->delete();
     }
+
+
+    /**
+     * Search for a conversation
+     *
+     * @param [type] $conversation
+     * @return void
+     */
+    public function search($conversation)
+    {
+        $conversations = Conversation::where('name', $conversation)->get();    
+        return ConversationResource::collection($conversations);
+    }
 }

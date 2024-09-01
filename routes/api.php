@@ -70,6 +70,11 @@ Route::middleware("auth:api")->group(function() {
     Route::apiResource("/conversations", ConversationController::class);
 
     /**
+     * Search route
+     */
+    Route::get("/conversations/search/{conversation}", [ConversationController::class, "search"]);
+
+    /**
      * Message routes
      */
     Route::apiResource("/conversations.messages", MessageController::class);
