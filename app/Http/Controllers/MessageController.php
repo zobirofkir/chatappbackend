@@ -7,6 +7,7 @@ use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
 use App\Jobs\MessageNotificationJob;
 use App\Mail\MessageNotificationMail;
+use App\Models\Attachment;
 use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Notification;
@@ -40,12 +41,27 @@ class MessageController extends Controller
                 ],
                 $request->validated()
             )
-        );    
+        );
+    
+        $attachmentPath = null;
+    
+        if ($request->hasFile('file')) {
+            $file = $request->file('file');
+            $attachmentPath = $file->store('attachments', 'public');
+            $fileType = $file->getClientOriginalExtension();
+    
+            // Create attachment record
+            Attachment::create([
+                'message_id' => $message->id,
+                'file_path' => $attachmentPath,
+                'file_type' => $fileType
+            ]);
+        }
+    
         $recipient = $this->getRecipientUserForConversation($conversation_id);
-        
         $friendUserId = $recipient->id;
         $friendEmail = $recipient->email;
-
+    
         Notification::create([
             'user_id' => $friendUserId,
             'message_id' => $message->id,
@@ -53,11 +69,11 @@ class MessageController extends Controller
             'status' => 'unread'
         ]);
     
-        MessageNotificationJob::dispatch($friendEmail, $message);
+        MessageNotificationJob::dispatch($friendEmail, $message, $attachmentPath);
     
         return MessageResource::make($message);
     }
-
+    
     /**
      * Display the specified resource.
      */

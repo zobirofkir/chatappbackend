@@ -20,7 +20,7 @@ class MessageResource extends JsonResource
             "user_id" => UserResource::make($this->user)->id,
             "message" => $this->message,
             "message_type" => $this->message_type,
-            "status" => $this->status,
+            "status" => $this->status,        
         ];
     }
 }

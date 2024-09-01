@@ -26,6 +26,7 @@ class MessageRequest extends FormRequest
             "message" => "required|string",
             "message_type" => "nullable|string",
             "status" => "nullable|string",
+            'file' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048'
         ];
     }
 }
