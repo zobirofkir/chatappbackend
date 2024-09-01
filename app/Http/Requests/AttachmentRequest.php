@@ -23,7 +23,7 @@ class AttachmentRequest extends FormRequest
     {
         return [
             "message_id" => "nullable|exists:messages,id",
-            "file_path" => "nullable|string",
+            "file_path" => "nullable|image|mimes:jpg,jpeg,png,pdf|max:2048",
             "file_type" => "nullable|string"
         ];
     }

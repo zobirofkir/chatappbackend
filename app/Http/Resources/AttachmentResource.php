@@ -17,7 +17,7 @@ class AttachmentResource extends JsonResource
         return [
             "id" => $this->id,
             "message_id" => $this->message_id,
-            "file_path" => $this->file_path,
+            "file_path" => $this->file_path ? asset('storage/' . ltrim($this->file_path, '/')) : null,
             "file_type" => $this->file_type
         ];
     }

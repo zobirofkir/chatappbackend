@@ -3,20 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
-use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\AuthResource;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-
     /**
      * Register a new user
      *
@@ -26,12 +23,12 @@ class AuthController extends Controller
     public function register(UserRequest $request): UserResource
     {
         $data = $request->validated();
-    
+
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('images', 'public');
-        }    
+        }
         $user = User::create($data);
-    
+
         return UserResource::make($user);
     }
 
@@ -39,58 +36,58 @@ class AuthController extends Controller
      * Login a user
      *
      * @param LoginRequest $request
-     * @return AuthResource
+     * @return AuthResource|JsonResponse
      */
-    public function login(LoginRequest $request) : AuthResource
+    public function login(LoginRequest $request): JsonResponse|AuthResource
     {
         $request->validated();
+
         /**
          * @var User
          */
         $user = User::where("email", $request->email)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return abort(401, "Email ou mot de passe incorrects");
+            return response()->json(['message' => 'Email or password incorrect'], 401);
         }
-        
+
         return AuthResource::make($user);
     }
-
 
     /**
      * Logout a user
      *
-     * @return boolean
+     * @return JsonResponse
      */
-    public function logout() : bool
+    public function logout(): JsonResponse
     {
-        $user = $this->currentUser();    
+        $user = User::find(Auth::user()->id);
         $user->token()?->revoke();
-        return true;
-    }
 
+        return response()->json(['message' => 'Successfully logged out']);
+    }
 
     /**
      * Get the authenticated user
      *
      * @return AuthResource
      */
-    public function me() : AuthResource
-    { 
-        return AuthResource::make($this->currentUser());
+    public function me(): AuthResource
+    {
+        $user = User::find(Auth::user()->id);
+        return AuthResource::make($user);
     }
-
 
     /**
      * Refresh the token
      *
      * @return AuthResource
      */
-    public function refresh() : AuthResource
+    public function refresh(): AuthResource
     {
-        return AuthResource::make($this->currentUser());
+        $user = User::find(Auth::user()->id);
+        return AuthResource::make($user);
     }
-
 
     /**
      * Update the authenticated user
@@ -100,43 +97,35 @@ class AuthController extends Controller
      */
     public function update(UserRequest $request): AuthResource
     {
-        $user = $this->currentUser();
-    
+        $user = User::find(Auth::user()->id);
         $data = $request->validated();
-    
+
         if ($request->hasFile('image')) {
             if ($user->image) {
                 Storage::disk('public')->delete($user->image);
             }
-    
+
             $data['image'] = $request->file('image')->store('images', 'public');
         }
-    
+
         $user->update($data);
-    
+
         return AuthResource::make($user);
     }
 
     /**
      * Delete the authenticated user
      *
-     * @return boolean
+     * @return JsonResponse
      */
-    public function destroy() : bool
+    public function destroy(): JsonResponse
     {
-        $user = $this->currentUser();
+        $user = User::find(Auth::user()->id);
+        if ($user->image) {
+            Storage::disk('public')->delete($user->image);
+        }
         $user->delete();
-        return true;
-    }   
-     
 
-    /**
-     * Get the authenticated user
-     *
-     * @return User
-     */
-    public function currentUser() : User
-    {
-        return User::find(Auth::user()->id);
+        return response()->json(['message' => 'User successfully deleted']);
     }
 }

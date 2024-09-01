@@ -6,6 +6,7 @@ use App\Http\Requests\AttachmentRequest;
 use App\Http\Resources\AttachmentResource;
 use App\Models\Attachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AttachmentController extends Controller
 {
@@ -24,14 +25,24 @@ class AttachmentController extends Controller
      */
     public function store(AttachmentRequest $request, $message_id)
     {
-        return AttachmentResource::make(
-            Attachment::create(
-                array_merge(
-                    ["message_id" => $message_id],
-                    $request->validated()
-                )
+        $data = $request->validated();
+
+        // Check if a file is uploaded
+        if ($request->hasFile('file_path')) {
+            // Store the file in the 'attachments' directory
+            $filePath = $request->file('file_path')->store('attachments', 'public');
+            $data['file_path'] = $filePath;
+        }
+
+        // Create the attachment
+        $attachment = Attachment::create(
+            array_merge(
+                ["message_id" => $message_id],
+                $data
             )
         );
+
+        return AttachmentResource::make($attachment);
     }
 
     /**
@@ -48,8 +59,23 @@ class AttachmentController extends Controller
      */
     public function update(AttachmentRequest $request, $attachment_id)
     {
-        $attachment = Attachment::where("id", $attachment_id)->firstOrFail();
-        $attachment->update($request->validated());
+        $attachment = Attachment::findOrFail($attachment_id);
+        $data = $request->validated();
+
+        // Check if a new file is uploaded
+        if ($request->hasFile('file_path')) {
+            // Delete the old file if it exists
+            if ($attachment->file_path) {
+                Storage::disk('public')->delete($attachment->file_path);
+            }
+
+            // Store the new file in the 'attachments' directory
+            $data['file_path'] = $request->file('file_path')->store('attachments', 'public');
+        }
+
+        // Update the attachment
+        $attachment->update($data);
+
         return AttachmentResource::make($attachment->refresh());
     }
 
@@ -59,6 +85,9 @@ class AttachmentController extends Controller
     public function destroy($attachment_id)
     {
         $attachment = Attachment::where("id", $attachment_id)->firstOrFail();
+        if ($attachment->file_path) {
+            Storage::disk('public')->delete($attachment->file_path);
+        }
         return $attachment->delete();
     }
 }

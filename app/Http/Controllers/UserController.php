@@ -14,11 +14,9 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index() : AnonymousResourceCollection
+    public function index(): AnonymousResourceCollection
     {
-        return UserResource::collection(
-            User::all()
-        );
+        return UserResource::collection(User::all());
     }
 
     /**
@@ -31,14 +29,15 @@ class UserController extends Controller
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('images', 'public');
         }
-        $user = User::create($data);    
+
+        $user = User::create($data);
         return UserResource::make($user);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(User $user) : UserResource
+    public function show(User $user): UserResource
     {
         return UserResource::make($user);
     }
@@ -66,8 +65,11 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user) : bool
+    public function destroy(User $user): void
     {
-        return $user->delete();
+        if ($user->image) {
+            Storage::disk('public')->delete($user->image);
+        }
+        $user->delete();
     }
 }
