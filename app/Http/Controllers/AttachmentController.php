@@ -76,7 +76,7 @@ class AttachmentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(AttachmentRequest $request, $attachment_id)
+    public function update(AttachmentRequest $request, $conversation_id, $message_id, $attachment_id)
     {
         $attachment = Attachment::findOrFail($attachment_id);
         $data = $request->validated();
@@ -93,7 +93,9 @@ class AttachmentController extends Controller
 
         broadcast(new AttachmentUpdated($attachment));
 
-        return AttachmentResource::make($attachment->refresh());
+        return AttachmentResource::make(
+            $attachment->refresh()
+        );
     }
 
     /**
