@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
@@ -70,4 +71,9 @@ Route::middleware("auth:api")->group(function() {
      * Message routes
      */
     Route::apiResource("/conversations.messages", MessageController::class);
+
+    /**
+     * Attachment routes
+     */
+    Route::apiResource("/conversations.messages.attachments", AttachmentController::class);
 });
