@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
@@ -16,18 +17,22 @@ class UserController extends Controller
     public function index() : AnonymousResourceCollection
     {
         return UserResource::collection(
-            User::paginate(10)
+            User::all()
         );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(UserRequest $request) : UserResource
+    public function store(UserRequest $request): UserResource
     {
-        return UserResource::make(
-            User::create($request->validated())
-        );
+        $data = $request->validated();
+    
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('images', 'public');
+        }
+        $user = User::create($data);    
+        return UserResource::make($user);
     }
 
     /**
@@ -41,12 +46,21 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UserRequest $request, User $user) : UserResource
+    public function update(UserRequest $request, User $user): UserResource
     {
-        $user->update($request->validated());
-        return UserResource::make(
-            $user->refresh()
-        );
+        $data = $request->validated();
+    
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                Storage::disk('public')->delete($user->image);
+            }
+    
+            $data['image'] = $request->file('image')->store('images', 'public');
+        }
+    
+        $user->update($data);
+    
+        return UserResource::make($user->refresh());
     }
 
     /**

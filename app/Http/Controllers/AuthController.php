@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class AuthController extends Controller
@@ -22,11 +23,16 @@ class AuthController extends Controller
      * @param UserRequest $request
      * @return UserResource
      */
-    public function register(UserRequest $request) : UserResource
+    public function register(UserRequest $request): UserResource
     {
-        return UserResource::make(
-            User::create($request->validated())
-        );
+        $data = $request->validated();
+    
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('images', 'public');
+        }    
+        $user = User::create($data);
+    
+        return UserResource::make($user);
     }
 
     /**
@@ -92,13 +98,24 @@ class AuthController extends Controller
      * @param UserRequest $request
      * @return AuthResource
      */
-    public function update(UserRequest $request) : AuthResource
+    public function update(UserRequest $request): AuthResource
     {
         $user = $this->currentUser();
-        $user->update($request->validated());
+    
+        $data = $request->validated();
+    
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                Storage::disk('public')->delete($user->image);
+            }
+    
+            $data['image'] = $request->file('image')->store('images', 'public');
+        }
+    
+        $user->update($data);
+    
         return AuthResource::make($user);
     }
-
 
     /**
      * Delete the authenticated user

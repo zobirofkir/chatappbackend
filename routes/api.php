@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\UserController;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Route;
 
@@ -22,6 +23,7 @@ Route::post("/auth/login", [AuthController::class, "login"]);
 Route::get('password/reset', function () {
     return view('emails.reset-password');
 })->name('password.reset.form');
+
 Route::post('password/email', [PasswordResetController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::post('password/reset', [PasswordResetController::class, 'reset'])->name('password.reset');
 
@@ -35,17 +37,17 @@ Route::middleware("auth:api")->group(function() {
     /**
      * User routes
      */
-    Route::apiResource("/auth/users", UserResource::class);
+    Route::apiResource("/auth/users", UserController::class);
 
     /**
      * Logout Route
      */
-    Route::post("/auth/logout", [AuthController::class, "logout"]);
+    Route::delete("/auth/logout", [AuthController::class, "logout"]);
 
     /**
      * Me Route
      */
-    Route::get("auth/me", [AuthController::class, "me"]);
+    Route::get("/auth/me", [AuthController::class, "me"]);
     
     /**
      * Refresh Route
@@ -55,7 +57,7 @@ Route::middleware("auth:api")->group(function() {
     /**
      * Update Route
      */
-    Route::post("/auth/update", [AuthController::class, "update"]);
+    Route::put("/auth/update", [AuthController::class, "update"]);
 
     /**
      * Destroy Route

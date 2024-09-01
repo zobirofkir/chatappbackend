@@ -25,7 +25,7 @@ class UserRequest extends FormRequest
             "name" => "required|string|min:5",
             "email"     => 'required|string|email|max:100|unique:users,email,'.$this->id,
             "password" => "required|min:8",
-            "image" => "nullable|image|string"
+            "image" => "nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048"
         ];
     }
 }
