@@ -46,6 +46,9 @@ class MessageController extends Controller
     
         $attachmentPath = null;
     
+        /**
+         * Check if a file is uploaded
+         */
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $attachmentPath = $file->store('attachments', 'public');
@@ -59,6 +62,9 @@ class MessageController extends Controller
             ]);
         }
     
+        /**
+         * Get the recipient user for the conversation
+         */
         $recipient = $this->getRecipientUserForConversation($conversation_id);
         $friendUserId = $recipient->id;
         $friendEmail = $recipient->email;
@@ -70,11 +76,15 @@ class MessageController extends Controller
             'status' => 'unread'
         ]);
     
+        /**
+         * Send email
+         */
         MessageNotificationJob::dispatch($friendEmail, $message, $attachmentPath);
 
-        // Broadcast the message
+        /**
+         * Send push notification
+         */
         broadcast(new MessageSent($message));
-    
         return MessageResource::make($message);
     }
     
@@ -83,6 +93,9 @@ class MessageController extends Controller
      */
     public function show($conversation_id, $message_id)
     {
+        /**
+         * Get the message
+         */
         $message = Message::where('conversation_id', $conversation_id)
                            ->where('id', $message_id)
                            ->firstOrFail();
@@ -94,10 +107,16 @@ class MessageController extends Controller
      */
     public function update(MessageRequest $request, $conversation_id, $message_id)
     {
+        /**
+         * Get the message
+         */
         $message = Message::where('conversation_id', $conversation_id)
                            ->where('id', $message_id)
                            ->firstOrFail();
                            
+        /**
+         * Update the message
+         */
         $message->update($request->validated());
 
         broadcast(new MessageSent($message));
@@ -111,10 +130,17 @@ class MessageController extends Controller
      */
     public function destroy($conversation_id, $message_id)
     {
+        /**
+         * Get the message
+         */
         $message = Message::where('conversation_id', $conversation_id)
                            ->where('id', $message_id)
                            ->firstOrFail();
 
+        /**
+         * Delete the message
+         */
+        $message->delete();
         broadcast(new MessageSent($message));
         return $message->delete();
     }
@@ -124,6 +150,9 @@ class MessageController extends Controller
      */
     private function getRecipientUserForConversation($conversation_id)
     {
+        /**
+         * Get the conversation
+         */
         $conversation = Conversation::find($conversation_id);
     
         if (!$conversation) {
