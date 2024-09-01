@@ -5,8 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\MessageRequest;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
+use App\Jobs\MessageNotificationJob;
+use App\Mail\MessageNotificationMail;
+use App\Models\Conversation;
 use App\Models\Message;
-
+use App\Models\Notification;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class MessageController extends Controller
 {
@@ -24,20 +30,34 @@ class MessageController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(MessageRequest $request, $conversation_id)
-    {    
-        return MessageResource::make(
-            Message::create(
-                array_merge(
-                    [
-                        "user_id" => $request->user()->id,
-                        "conversation_id" => $conversation_id
-                    ],
-                    $request->validated()
-                )
+    {
+        // Create and store the message
+        $message = Message::create(
+            array_merge(
+                [
+                    "user_id" => $request->user()->id,
+                    "conversation_id" => $conversation_id
+                ],
+                $request->validated()
             )
-        );
-    }
+        );    
+        $recipient = $this->getRecipientUserForConversation($conversation_id);
         
+        $friendUserId = $recipient->id;
+        $friendEmail = $recipient->email;
+
+        Notification::create([
+            'user_id' => $friendUserId,
+            'message_id' => $message->id,
+            'notification_type' => 'message',
+            'status' => 'unread'
+        ]);
+    
+        MessageNotificationJob::dispatch($friendEmail, $message);
+    
+        return MessageResource::make($message);
+    }
+
     /**
      * Display the specified resource.
      */
@@ -76,4 +96,18 @@ class MessageController extends Controller
         return $message->delete();
     }
     
+    /**
+     * Get the recipient user for the conversation
+     */
+    private function getRecipientUserForConversation($conversation_id)
+    {
+        $conversation = Conversation::find($conversation_id);
+    
+        if (!$conversation) {
+            return null;
+        }
+    
+        return User::where('id', '!=', Auth::id())->first();
+    }
+
 }

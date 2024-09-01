@@ -30,4 +30,9 @@ class Message extends Model
     {
         return $this->hasMany(Attachment::class);
     }
+
+    public function replies()
+    {
+        return $this->hasMany(Message::class, "parent_id");
+    }
 }
