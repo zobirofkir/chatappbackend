@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ConversationRequest;
 use App\Http\Resources\ConversationResource;
 use App\Models\Conversation;
-use Illuminate\Http\Request;
 
 class ConversationController extends Controller
 {
