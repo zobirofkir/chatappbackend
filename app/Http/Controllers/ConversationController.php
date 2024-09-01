@@ -69,6 +69,8 @@ class ConversationController extends Controller
     public function search($conversation)
     {
         $conversations = Conversation::where('name', $conversation)->get();    
-        return ConversationResource::collection($conversations);
+        return ConversationResource::collection(
+            $conversations
+        );
     }
 }
