@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignId("conversation_id")->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->foreignId("user_id")->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->longText("message");
-            $table->string("message_type");
-            $table->string("status");
+            $table->string("message_type")->nullable();
+            $table->string("status")->nullable();
             $table->timestamps();
         });
     }
