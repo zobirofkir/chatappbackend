@@ -13,6 +13,7 @@ use App\Models\Conversation;
 use App\Models\Message;
 use App\Models\Notification;
 use App\Models\User;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -21,7 +22,7 @@ class MessageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() : AnonymousResourceCollection
     {
         return MessageResource::collection(
             Message::all()
@@ -31,7 +32,7 @@ class MessageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(MessageRequest $request, $conversation_id)
+    public function store(MessageRequest $request, $conversation_id) : MessageResource
     {
         // Create and store the message
         $message = Message::create(
@@ -91,7 +92,7 @@ class MessageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($conversation_id, $message_id)
+    public function show($conversation_id, $message_id) : MessageResource
     {
         /**
          * Get the message
@@ -105,7 +106,7 @@ class MessageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(MessageRequest $request, $conversation_id, $message_id)
+    public function update(MessageRequest $request, $conversation_id, $message_id) : MessageResource
     {
         /**
          * Get the message
@@ -128,7 +129,7 @@ class MessageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($conversation_id, $message_id)
+    public function destroy($conversation_id, $message_id) : bool
     {
         /**
          * Get the message
@@ -148,7 +149,7 @@ class MessageController extends Controller
     /**
      * Get the recipient user for the conversation
      */
-    private function getRecipientUserForConversation($conversation_id)
+    private function getRecipientUserForConversation($conversation_id) : User
     {
         /**
          * Get the conversation
