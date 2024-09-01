@@ -5,13 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ConversationRequest;
 use App\Http\Resources\ConversationResource;
 use App\Models\Conversation;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ConversationController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index() : AnonymousResourceCollection
     {
         return ConversationResource::collection(
             Conversation::all()
@@ -21,7 +22,7 @@ class ConversationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(ConversationRequest $request)
+    public function store(ConversationRequest $request) : ConversationResource
     {
         return ConversationResource::make(
             Conversation::create(array_merge(
@@ -34,7 +35,7 @@ class ConversationController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Conversation $conversation)
+    public function show(Conversation $conversation) : ConversationResource
     {
         return ConversationResource::make($conversation);
     }
@@ -42,7 +43,7 @@ class ConversationController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(ConversationRequest $request, Conversation $conversation)
+    public function update(ConversationRequest $request, Conversation $conversation) : ConversationResource
     {
         $conversation->update($request->validated());
         return ConversationResource::make(
@@ -53,7 +54,7 @@ class ConversationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Conversation $conversation)
+    public function destroy(Conversation $conversation) : bool
     {
         return $conversation->delete();
     }
@@ -65,7 +66,7 @@ class ConversationController extends Controller
      * @param [type] $conversation
      * @return void
      */
-    public function search($conversation)
+    public function search($conversation) : AnonymousResourceCollection
     {
         $conversations = Conversation::where('name', $conversation)->get();    
         return ConversationResource::collection(
