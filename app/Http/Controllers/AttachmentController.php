@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\AttachmentUpdated;
 use App\Http\Requests\AttachmentRequest;
 use App\Http\Resources\AttachmentResource;
+use App\Jobs\MessageNotificationJob;
+use App\Mail\MessageNotificationMail;
 use App\Models\Attachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -42,6 +45,11 @@ class AttachmentController extends Controller
             )
         );
 
+        // Dispatch event
+        broadcast(new AttachmentUpdated($attachment));
+        // Dispatch a job to handle additional tasks, like sending notifications
+        MessageNotificationJob::dispatch($request->user()->email, $attachment->message, $attachment->file_path);
+
         return AttachmentResource::make($attachment);
     }
 
@@ -75,6 +83,8 @@ class AttachmentController extends Controller
 
         // Update the attachment
         $attachment->update($data);
+        // Dispatch event
+        broadcast(new AttachmentUpdated($attachment));
 
         return AttachmentResource::make($attachment->refresh());
     }
@@ -88,6 +98,8 @@ class AttachmentController extends Controller
         if ($attachment->file_path) {
             Storage::disk('public')->delete($attachment->file_path);
         }
+        // Dispatch event
+        broadcast(new AttachmentUpdated($attachment));
         return $attachment->delete();
     }
 }

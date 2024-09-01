@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MessageSent;
 use App\Http\Requests\MessageRequest;
 use App\Http\Resources\ConversationResource;
 use App\Http\Resources\MessageResource;
@@ -70,6 +71,9 @@ class MessageController extends Controller
         ]);
     
         MessageNotificationJob::dispatch($friendEmail, $message, $attachmentPath);
+
+        // Broadcast the message
+        broadcast(new MessageSent($message));
     
         return MessageResource::make($message);
     }
@@ -95,6 +99,8 @@ class MessageController extends Controller
                            ->firstOrFail();
                            
         $message->update($request->validated());
+
+        broadcast(new MessageSent($message));
         return MessageResource::make(
             $message->refresh()
         );
@@ -108,7 +114,8 @@ class MessageController extends Controller
         $message = Message::where('conversation_id', $conversation_id)
                            ->where('id', $message_id)
                            ->firstOrFail();
-    
+
+        broadcast(new MessageSent($message));
         return $message->delete();
     }
     

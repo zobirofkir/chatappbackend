@@ -8,7 +8,7 @@
     <p>{{ $messageContent }}</p>
 
     @isset($attachmentPath)
-        <p>Attachment: <a href="{{ asset('storage/' . $attachmentPath) }}">Download</a></p>
+        <p>Attachment: <a href="{{ asset('storage/' . $attachmentPath) }}" download>Download</a></p>
     @endisset
 </body>
 </html>
