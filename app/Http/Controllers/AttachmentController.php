@@ -6,8 +6,8 @@ use App\Events\AttachmentUpdated;
 use App\Http\Requests\AttachmentRequest;
 use App\Http\Resources\AttachmentResource;
 use App\Jobs\MessageNotificationJob;
-use App\Mail\MessageNotificationMail;
 use App\Models\Attachment;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,8 +26,13 @@ class AttachmentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AttachmentRequest $request, $message_id)
+    public function store(AttachmentRequest $request, $conversation_id, $message_id)
     {
+        // Verify that the message exists within the specified conversation
+        Message::where('id', $message_id)
+            ->where('conversation_id', $conversation_id)
+            ->first();
+
         $data = $request->validated();
 
         // Check if a file is uploaded
@@ -38,15 +43,15 @@ class AttachmentController extends Controller
         }
 
         // Create the attachment
-        $attachment = Attachment::create(
-            array_merge(
-                ["message_id" => $message_id],
-                $data
-            )
-        );
+        $attachment = Attachment::create([
+            'message_id' => $message_id,
+            'file_path' => $data['file_path'] ?? null,
+            'file_type' => $data['file_type'] ?? null,
+        ]);
 
         // Dispatch event
         broadcast(new AttachmentUpdated($attachment));
+
         // Dispatch a job to handle additional tasks, like sending notifications
         MessageNotificationJob::dispatch($request->user()->email, $attachment->message, $attachment->file_path);
 
@@ -56,12 +61,18 @@ class AttachmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show($attachment_id)
+    public function show($conversation_id, $message_id, $attachment_id)
     {
-        $attachment = Attachment::where("id", $attachment_id)->firstOrFail();
+        $attachment = Attachment::where('id', $attachment_id)
+            ->where('message_id', $message_id)
+            ->whereHas('message', function ($query) use ($conversation_id) {
+                $query->where('conversation_id', $conversation_id);
+            })
+            ->firstOrFail();
+    
         return AttachmentResource::make($attachment);
     }
-
+    
     /**
      * Update the specified resource in storage.
      */
@@ -70,20 +81,16 @@ class AttachmentController extends Controller
         $attachment = Attachment::findOrFail($attachment_id);
         $data = $request->validated();
 
-        // Check if a new file is uploaded
         if ($request->hasFile('file_path')) {
-            // Delete the old file if it exists
             if ($attachment->file_path) {
                 Storage::disk('public')->delete($attachment->file_path);
             }
 
-            // Store the new file in the 'attachments' directory
             $data['file_path'] = $request->file('file_path')->store('attachments', 'public');
         }
 
-        // Update the attachment
         $attachment->update($data);
-        // Dispatch event
+
         broadcast(new AttachmentUpdated($attachment));
 
         return AttachmentResource::make($attachment->refresh());
@@ -92,14 +99,16 @@ class AttachmentController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($attachment_id)
-    {
-        $attachment = Attachment::where("id", $attachment_id)->firstOrFail();
+    public function destroy($conversation_id, $message_id, $attachment_id)
+    {    
+        $attachment = Attachment::find($attachment_id);
+            
         if ($attachment->file_path) {
             Storage::disk('public')->delete($attachment->file_path);
         }
-        // Dispatch event
+    
         broadcast(new AttachmentUpdated($attachment));
-        return $attachment->delete();
+        
+        return $attachment->delete();        
     }
 }
