@@ -81,5 +81,5 @@ Route::middleware("auth:api")->group(function() {
     /**
      * Attachment routes
      */
-    Route::apiResource("/conversations.messages.attachments", AttachmentController::class);
+    Route::apiResource("/conversations.attachments", AttachmentController::class);
 });

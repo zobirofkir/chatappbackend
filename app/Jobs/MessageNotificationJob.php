@@ -16,16 +16,14 @@ class MessageNotificationJob implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     private $friendEmail;
-    private $message;
     protected $attachmentPath;
 
     /**
      * Create a new job instance.
      */
-    public function __construct($friendEmail, Message $message, $attachmentPath = null)
+    public function __construct($friendEmail, $attachmentPath = null)
     {
         $this->friendEmail = $friendEmail;
-        $this->message = $message;
         $this->attachmentPath = $attachmentPath;
     }
 
@@ -34,6 +32,6 @@ class MessageNotificationJob implements ShouldQueue
      */
     public function handle(): void
     {
-        Mail::to($this->friendEmail)->send(new MessageNotificationMail($this->message, $this->attachmentPath));
+        Mail::to($this->friendEmail)->send(new MessageNotificationMail($this->attachmentPath));
     }
 }

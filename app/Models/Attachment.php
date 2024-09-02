@@ -10,13 +10,13 @@ class Attachment extends Model
     use HasFactory;
 
     protected $fillable = [
-        "message_id",
+        "conversation_id",
         "file_path",
         "file_type"
     ];
 
-    public function message()
+    public function conversation()
     {
-        return $this->belongsTo(Message::class);
+        return $this->belongsTo(Conversation::class);
     }
 }
