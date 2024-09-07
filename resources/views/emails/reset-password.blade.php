@@ -7,67 +7,76 @@
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f4f4;
             margin: 0;
-            overflow: hidden;
-            background: #b8dbff;
+            background-color: #e2f1ff;
         }
         .container {
             background: #fff;
-            padding: 20px;
+            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 100%;
-            max-width: 400px;
+            max-width: 360px;
             box-sizing: border-box;
-            position: relative;
-            z-index: 1;
         }
         h1 {
             margin-top: 0;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
         }
         .form-group {
-            margin-bottom: 15px;
-            
+            margin-bottom: 20px;
+            text-align: center
         }
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
         }
         .form-group input {
-            width: 100%;
-            padding-top: 10px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            text-align: center;
+            border-radius: 6px;
+            font-size: 16px;
+            color: #333;
+            padding: 16px;
+        }
+        .form-group input:focus {
+            border-color: #007bff;
+            outline: none;
         }
         .form-group button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             background-color: #007bff;
             color: #fff;
             font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
         .form-group button:hover {
             background-color: #0056b3;
         }
         .notification {
-            position: fixed;
+            position: absolute;
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px;
-            border-radius: 4px;
+            padding: 12px;
+            border-radius: 6px;
             z-index: 1000;
             transition: opacity 0.5s ease-out;
+            max-width: 360px;
+            box-sizing: border-box;
         }
         .notification.success {
             background-color: #d4edda;
@@ -84,7 +93,7 @@
         }
     </style>
 </head>
-<body>    
+<body>
     <div class="container">
         <h1>Reset Your Password</h1>
 
