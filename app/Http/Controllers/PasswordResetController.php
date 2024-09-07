@@ -3,10 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ResetPasswordRequest;
+use App\Jobs\SendResetLinkEmailJob;
+use App\Jobs\ResetPasswordJob;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Validation\ValidationException;
 
 class PasswordResetController extends Controller
 {
@@ -20,13 +19,10 @@ class PasswordResetController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        $status = Password::sendResetLink($request->only('email'));
+        // Use dispatch helper to queue the job
+        dispatch(new SendResetLinkEmailJob($request->input('email')));
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return true;
-        }
-
-        return false;
+        return true;
     }
 
     /**
@@ -38,21 +34,10 @@ class PasswordResetController extends Controller
     public function reset(ResetPasswordRequest $request)
     {
         $validated = $request->validated();
-    
-        $status = Password::reset(
-            $validated,
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->save();
-                $user->tokens()->delete();
-            }
-        );
-    
-        if ($status === Password::PASSWORD_RESET) {
-            return response()->json(['status' => 'password_reset_success'], 200);
-        }
-    
-        return response()->json(['status' => 'password_reset_failed'], 400);
+
+        // Use dispatch helper to queue the job
+        dispatch(new ResetPasswordJob($validated));
+
+        return response()->json(['status' => 'password_reset_success'], 200);
     }    
 }
