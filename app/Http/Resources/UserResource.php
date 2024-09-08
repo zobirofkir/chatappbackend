@@ -18,7 +18,8 @@ class UserResource extends JsonResource
             "id" => $this->id,
             "name" => $this->name,
             "email" => $this->email,
-            "image" => $this->image ? asset('storage/' . ltrim($this->image, '/')) : null
+            "image" => $this->image ? asset('storage/' . ltrim($this->image, '/')) : null,
+            "timestamp" => $this->created_at->diffForHumans(),
         ];
     }
 }
